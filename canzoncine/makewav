@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+
+import os
+import re
+
+os.system("rm *.wav")
+for file_mp3 in os.listdir():
+    match = re.fullmatch(r'(\d\d).*\.mp3', file_mp3)
+    if match:
+        file_wav = match.group(1) + ".wav"
+        cmd = f"ffmpeg -i '{file_mp3}' -ar 44100 -acodec pcm_u8 -map_metadata -1 -map_chapters -1 tmp.wav; tail tmp.wav -c +103 > '{file_wav}'; rm tmp.wav"
+        print(cmd)
+        os.system(cmd)
+
