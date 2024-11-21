@@ -11,7 +11,8 @@
 #include <SPI.h>
 #include <AudioZero.h>
 
-#include <CdSLightSensor.h>
+constexpr int pin_battery = A1;
+constexpr int pin_SD_CS = 4;
 
 void setup(void) {
   // Start Serial
@@ -22,13 +23,33 @@ void setup(void) {
   Serial.println("*** PimpaBox ***");
   Serial.println("***  AP2024. ***");
   // Start SD
-  if (!SD.begin(4)) {
+  if (!SD.begin(pin_SD_CS)) {
     Serial.println("SD begin error");
     while (true);
   }
   // Start AudioZero
   AudioZero.begin(2*44100);
   analogWriteResolution(8);
+  // Check battery status
+  analogReadResolution(10);
+  constexpr float r1 = 68;
+  constexpr float r2 = 33;
+  const float v_battery =
+    (analogRead(pin_battery) / 1024.0) * 3.3 * (r1 + r2) / r2;
+  Serial.print("v_battery=");
+  Serial.println(v_battery, 3);
+  if (v_battery < 5.2) {
+    char filename[] = "sad.wav";
+    Serial.print("Playing ");
+    Serial.println(filename);
+    File file = SD.open(filename);
+    if (!file) {
+      Serial.println("File open error");
+      while (true);
+    }
+    AudioZero.play(file);
+    file.close();
+  }
 }
 
 void loop(void) {
