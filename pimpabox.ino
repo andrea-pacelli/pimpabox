@@ -13,12 +13,22 @@
 
 constexpr int pin_battery = A1;
 constexpr int pin_power = 2;
+constexpr int pin_shutdown = 3;
 constexpr int pin_SD_CS = 4;
+
+void playFile(File &file) {
+  digitalWrite(pin_shutdown, LOW);
+  AudioZero.play(file);
+  digitalWrite(pin_shutdown, HIGH);
+}
 
 void setup(void) {
   // Lock power switch
   pinMode(pin_power, OUTPUT);
   digitalWrite(pin_power, HIGH);
+  // Shutdown amp
+  pinMode(pin_shutdown, OUTPUT);
+  digitalWrite(pin_shutdown, HIGH);
   // Start Serial
   Serial.begin(9600);
   const unsigned long millis0 = millis();
@@ -51,7 +61,7 @@ void setup(void) {
       Serial.println("File open error");
       while (true);
     }
-    AudioZero.play(file);
+    playFile(file);
     file.close();
     delay(500);
     digitalWrite(pin_power, LOW);
@@ -71,7 +81,7 @@ void loop(void) {
     Serial.println("File open error");
     while (true);
   }
-  AudioZero.play(file);
+  playFile(file);
   file.close();
   delay(500);
 }
