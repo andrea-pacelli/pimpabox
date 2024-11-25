@@ -66,6 +66,7 @@ void setup(void) {
     delay(500);
     digitalWrite(pin_power, LOW);
   }
+  randomSeed(analogRead(pin_battery));
 }
 
 void loop(void) {
