@@ -14,7 +14,7 @@
 constexpr int pin_battery = A1;
 constexpr int pin_power = 2;
 constexpr int pin_shutdown = 3;
-constexpr int pin_SD_CS = 4;
+constexpr int pin_SD_CS = 10;
 
 void playFile(File &file) {
   digitalWrite(pin_shutdown, LOW);
