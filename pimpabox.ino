@@ -85,5 +85,6 @@ void loop(void) {
   playFile(file);
   file.close();
   delay(500);
+  digitalWrite(pin_power, LOW);
 }
 
