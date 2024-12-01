@@ -10,6 +10,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <AudioZero.h>
+#include <Arduino_LSM6DS3.h>
 
 constexpr int pin_battery = A1;
 constexpr int pin_power = 2;
@@ -44,6 +45,11 @@ void setup(void) {
   // Start AudioZero
   AudioZero.begin(2*44100);
   analogWriteResolution(8);
+  // Start IMU
+  if (!IMU.begin()) {
+    Serial.println("IMU begin error");
+    while (true);
+  }
   // Check battery status
   analogReadResolution(10);
   constexpr float r1 = 68;
@@ -70,7 +76,25 @@ void setup(void) {
 }
 
 void loop(void) {
-  int song_number = random(1, 7);
+  float a[3];
+  IMU.readAcceleration(a[0], a[1], a[2]);
+  Serial.print("a=(");
+  Serial.print(a[0]);
+  Serial.print(",");
+  Serial.print(a[1]);
+  Serial.print(",");
+  Serial.print(a[2]);
+  Serial.println(")");
+  int song_number = 0;
+  for (int i = 0; i < 3; i++) {
+    const int j = 1 + 2 * i;
+    if (a[i] > 0.5) {
+      song_number = j;
+    }
+    else if (a[i] < -0.5) {
+      song_number = j + 1;
+    }
+  }
   char filename[10];
   sprintf(filename, "%s%d.wav",
 	  (song_number < 10 ? "0" : ""),
