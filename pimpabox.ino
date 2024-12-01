@@ -17,10 +17,19 @@ constexpr int pin_power = 2;
 constexpr int pin_shutdown = 3;
 constexpr int pin_SD_CS = 10;
 
-void playFile(File &file) {
+void playFile(char *filename) {
+  Serial.print("Playing ");
+  Serial.println(filename);
+  File file = SD.open(filename);
+  if (!file) {
+    Serial.println("File open error");
+    while (true);
+  }
   digitalWrite(pin_shutdown, LOW);
   AudioZero.play(file);
   digitalWrite(pin_shutdown, HIGH);
+  file.close();
+  delay(500);
 }
 
 void setup(void) {
@@ -60,16 +69,7 @@ void setup(void) {
   Serial.println(v_battery, 3);
   if (v_battery < 5.2) {
     char filename[] = "sad.wav";
-    Serial.print("Playing ");
-    Serial.println(filename);
-    File file = SD.open(filename);
-    if (!file) {
-      Serial.println("File open error");
-      while (true);
-    }
-    playFile(file);
-    file.close();
-    delay(500);
+    playFile(filename);
     digitalWrite(pin_power, LOW);
   }
   randomSeed(analogRead(pin_battery));
@@ -99,16 +99,7 @@ void loop(void) {
   sprintf(filename, "%s%d.wav",
 	  (song_number < 10 ? "0" : ""),
 	  song_number);
-  Serial.print("Playing ");
-  Serial.println(filename);
-  File file = SD.open(filename);
-  if (!file) {
-    Serial.println("File open error");
-    while (true);
-  }
-  playFile(file);
-  file.close();
-  delay(500);
+  playFile(filename);
   digitalWrite(pin_power, LOW);
 }
 
