@@ -76,16 +76,25 @@ void setup(void) {
 }
 
 void loop(void) {
-  float ax, ay, az;
-  IMU.readAcceleration(ax, ay, az);
+  float a[3];
+  IMU.readAcceleration(a[0], a[1], a[2]);
   Serial.print("a=(");
-  Serial.print(ax);
+  Serial.print(a[0]);
   Serial.print(",");
-  Serial.print(ay);
+  Serial.print(a[1]);
   Serial.print(",");
-  Serial.print(az);
+  Serial.print(a[2]);
   Serial.println(")");
-  int song_number = random(1, 7);
+  int song_number = 0;
+  for (int i = 0; i < 3; i++) {
+    const int j = 1 + 2 * i;
+    if (a[i] > 0.5) {
+      song_number = j;
+    }
+    else if (a[i] < -0.5) {
+      song_number = j + 1;
+    }
+  }
   char filename[10];
   sprintf(filename, "%s%d.wav",
 	  (song_number < 10 ? "0" : ""),
