@@ -13,6 +13,11 @@
 #include <Arduino_LSM6DS3.h>
 #include <ArduinoECCX08.h>
 
+#include <string>
+using std::string;
+#include <vector>
+using std::vector;
+
 constexpr int pin_battery = A1;
 constexpr int pin_power = 2;
 constexpr int pin_shutdown = 3;
@@ -25,7 +30,7 @@ struct State {
 
 State state;
 
-void playFile(char *filename) {
+void playFile(const char *filename) {
   Serial.print("Playing ");
   Serial.println(filename);
   File file = SD.open(filename);
@@ -38,6 +43,31 @@ void playFile(char *filename) {
   digitalWrite(pin_shutdown, HIGH);
   file.close();
   delay(500);
+}
+
+vector<string> file_names;
+
+void readFileNames(void) {
+  File root = SD.open("/");
+  while (true) {
+    File entry = root.openNextFile();
+    if (!entry)
+      break;
+    char *s = entry.name();
+    if (isDigit(*s)) {
+      file_names.push_back(s);
+    }
+  }
+}
+
+void printFileNames(void) {
+  Serial.print(file_names.size());
+  Serial.println(" songs:");
+  for (int i = 0; i < file_names.size(); i++) {
+    Serial.print(i);
+    Serial.print(" ");
+    Serial.println(file_names[i].c_str());
+  }
 }
 
 void setup(void) {
@@ -68,6 +98,9 @@ void setup(void) {
     Serial.println("SD begin error");
     while (true);
   }
+  // Read and print out file names
+  readFileNames();
+  printFileNames();
   // Start AudioZero
   AudioZero.begin(2*44100);
   analogWriteResolution(8);
@@ -108,8 +141,8 @@ void setup(void) {
 void loop(void) {
   // Next song
   int song_number = state.last_song + 1;
-  if (song_number > 6) {
-    song_number = 2;
+  if (song_number >= file_names.size()) {
+    song_number = 0;
   }
   state.last_song = song_number;
   // Save song
@@ -119,11 +152,7 @@ void loop(void) {
     while (true);
   }
   // Play song
-  char filename[10];
-  sprintf(filename, "%s%d.wav",
-	  (song_number < 10 ? "0" : ""),
-	  song_number);
-  playFile(filename);
+  playFile(file_names[song_number].c_str());
   digitalWrite(pin_power, LOW);
 }
 
