@@ -53,9 +53,9 @@ void readFileNames(void) {
     File entry = root.openNextFile();
     if (!entry)
       break;
-    char *s = entry.name();
-    if (isDigit(*s)) {
-      file_names.push_back(s);
+    char *file_name = entry.name();
+    if (isDigit(file_name[0])) {
+      file_names.push_back(file_name);
     }
   }
 }
